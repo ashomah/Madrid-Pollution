@@ -34,6 +34,8 @@ for (i in packages_list){
     library(i, character.only = TRUE)
   }
 }
+
+webshot::install_phantomjs()
 ```
 
 ``` {r Load Prepared Data, echo = FALSE}
