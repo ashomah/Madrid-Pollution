@@ -4,8 +4,8 @@ Ashley O'Mahony | [ashleyomahony.com](http://ashleyomahony.com) | December 2018
 
 ------------------------------------------------------------------------
 
-Madrid Pollution Dataset
-------------------------
+Dataset of the Pollution Level in Madrid
+----------------------------------------
 
 This report describes an analysis of the **pollution in Madrid between 2011 and 2016**.
 
@@ -25,21 +25,11 @@ Packages
 
 This analysis requires these R packages:
 
--   Data Cleaning
-    -   readxl
-    -   tidyr
--   Plotting
-    -   ggplot2
-    -   corrplot
-    -   GGally
-    -   gridExtra
-    -   leaflet
--   Statistics
-    -   jtools
-    -   lattice
-    -   car
-    -   caret
-    -   MASS
+-   Data Cleaning: `readxl`, `tidyr`
+
+-   Plotting: `ggplot2`, `corrplot`, `GGally`, `gridExtra`, `leaflet`
+
+-   Statistics: `jtools`, `lattice`, `car`, `caret`, `MASS`
 
 These packages are installed and loaded if necessary by the main script.
 
@@ -55,6 +45,8 @@ The dataset contains information for 12 pollutants: **NO2, SO2, O3, PM2.5, BEN, 
 The workflow to prepare the data is as below:
 
 ![](documents/Data_Preparation_R.png)
+
+</br>
 
 Additional variables have been added:
 
@@ -139,12 +131,14 @@ summary(pollution_daily_h)
     ##  3rd Qu.:73.00   3rd Qu.:12.60   3rd Qu.:17.00  
     ##  Max.   :99.00   Max.   :35.60   Max.   :24.50
 
-The data frame doesn't contain any NA across its 2192 observations and 22 variables.
+The data frame doesn't contain any `NA` across its 2192 observations and 22 variables.
+
+</br>
 
 ------------------------------------------------------------------------
 
-Variables Evolution Over Time
------------------------------
+Evolution of the Variables Over Time
+------------------------------------
 
 The charts below describe the evolution of each variable over time.
 
@@ -152,25 +146,33 @@ The charts below describe the evolution of each variable over time.
 
 *Dark Orange = Main Pollutants | Light Orange = Other Pollutants | Blue = Weather Parameters*
 
-We can see a cyclic evolution following the seasons, which suggests that the weather has an influence on the level of some pollutants.
+</br>
+
+Seasonal cycles suggests that the weather has an influence on the level of some pollutants.
+
+</br>
 
 ------------------------------------------------------------------------
 
 Correlation Matrix
 ------------------
 
-To identify correlations between the variables, we firstly plot a correlation matrix:
+A correlation matrix is plotted to identify correlations between the variables:
 
 <img src="Madrid-Pollution_Report_files/figure-markdown_github/Correlation Matrix-1.png" style="display: block; margin: auto;" />
 
+</br>
+
 Another view provides more information: <img src="Madrid-Pollution_Report_files/figure-markdown_github/Simplified Correlation Matrix GGPairs-1.png" style="display: block; margin: auto;" />
+
+</br>
 
 ------------------------------------------------------------------------
 
-NO2 Linear Correlation
-----------------------
+NO2 Model
+---------
 
-First we split the data in train and test (80% - 20%).
+A linear regression will be used to model the level of pollution in NO2. The data is split in train and test sets with the ratio 80|20.
 
 ``` r
 set.seed(2018)
@@ -180,9 +182,9 @@ train.sample <- pollution_daily_h[train.index,]
 test.sample <- pollution_daily_h[-train.index,]
 ```
 
-The **Train Sample has 1754 rows** and the **Test Sample has 438 rows**.
+The Train set has 1754 rows and the Test set has 438 rows.
 
-We want to define a *multilinear regression model* in order to explain NO2 with the rest of the variables. By definition, temp\_min and temp\_max are correlated with temp\_avg, so we remove them.We use the variable *temp\_gap* to measure their influence on the model.
+`temp_min` and `temp_max` are removed as correlated by definition with `temp_avg`. But the variable `temp_gap` is created to measure their influence on the model.
 
 ``` r
 multi_model_NO2<-lm(NO2~.-month-week-date-temp_min-temp_max, data=train.sample)
@@ -225,17 +227,23 @@ print(lm_stats)
     ## Multiple R-squared:  0.9113, Adjusted R-squared:  0.9105 
     ## F-statistic:  1116 on 16 and 1737 DF,  p-value: < 2.2e-16
 
--   As we can see our **R-square value is 0.9113273** and the **Adj.R-squared is 0.9105105**, which means our model is able to explain NO2 well.
--   Particularly, this value means that predictors explain **0.9113273 of the variability** in NO2.This could possibly be improved if there is one or more predictors that aren’t very good and are hurting our model.
--   One thing to note though is that comparing R-squared values is not a great way of deciding which model is better than the other.
+</br>
 
-*Mean squared error* is exactly how it sounds: we take the mean of all of our errors squared. This is a good measure for seeing how accurate a model is because we obviously want as little error as possible. In our case the **MSE is 5.0961601**.
+The R-square of the model is 0.9113 and the Adjusted R-squared is 0.9105, which means that the model is able to well explain NO2. Precisely, the predictors explain 91.1% of the variability in NO2.
 
-Another thing to look at is the *confidence intervals* for our coefficients. Our estimates for each coefficient are not exact so we want to find a range where we are at a certain percent confident that the actual value is in this range . We can interpret this like: for every change of one (1) unit in the **SO2**, we are **95% confident** that the **NO2 will change between 1.2311291, 1.5350938**.
+The *Mean Squared Error* measures the mean of all of our errors squared. It describes the accuracy of a model. The MSE of this model is 5.0962.
+
+Another way to evaluate a model is looking at the *confidence intervals* of the coefficients. The estimates for each coefficient are not exact, so the confidence intervals define a range in which the actual values are, at a certain level of confidence:
+
+*For every change of one (1) unit in the SO2 level, one can be 95% confident that the level of NO2 will change between 1.23 and 1.54.*
+
+The confidence intervals can be plotted:
 
 <img src="Madrid-Pollution_Report_files/figure-markdown_github/Confidence Interval-1.png" style="display: block; margin: auto;" />
 
-Another important thing is to investigate is if the *assumptions* regarding linear regression are valid. This can be observed by creating the below 4 plots.
+</br>
+
+The *residuals* of the model can be checked using these plots:
 
 ``` r
 resids_multi_NO2 <- multi_model_NO2$residuals
@@ -243,7 +251,7 @@ resids_multi_NO2 <- multi_model_NO2$residuals
 
 <img src="Madrid-Pollution_Report_files/figure-markdown_github/Confidence Intervals-1.png" style="display: block; margin: auto;" />
 
-After this analysis, lets see if making some transformations may be beneficial to our model. First, we implement *stepwise regression* to find out the significance in variables.
+The residuals seem correct and validate the model. Significant variables can be found using a *stepwise regression*.
 
     ## Start:  AIC=5729.65
     ## NO2 ~ (date + SO2 + O3 + PM2.5 + BEN + CO + EBE + NMHC + NO + 
@@ -335,11 +343,54 @@ After this analysis, lets see if making some transformations may be beneficial t
     ## 2 - PM10  1  3.058383      1738   45114.42 5727.770
     ## 3 - NMHC  1 11.762300      1739   45126.18 5726.227
 
-Based on the above mentioned results, we get the following formula and the variables removed should be PM10 and NMHC. So, we create the model.
+</br>
 
-We can still notice a really high R-squared of value 0.9112981. After that, we want to treat **multicollinearity** with the **VIF Method** (variance inflation factors).
+These results indicate that the variables `PM10` and `NMHC` can be removed. The resulting model is:
 
-As a general rule, if VIF is larger than 5, then multi collinearity is assumed to be high. So,by starting with all the variables in the model, we are going to \* calculate the VIF values, \* remove the biggest one, \* re-do the model until all the explanatory variables have a VIF below 5.
+    ## 
+    ## Call:
+    ## lm(formula = NO2 ~ . - month - week - date - temp_min - temp_max - 
+    ##     PM10 - NMHC, data = train.sample)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -22.0494  -3.1185   0.0019   3.2071  21.4585 
+    ## 
+    ## Coefficients:
+    ##                Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)     0.45196    2.92446   0.155  0.87720    
+    ## SO2             1.36999    0.07520  18.217  < 2e-16 ***
+    ## O3             -0.14716    0.01166 -12.620  < 2e-16 ***
+    ## PM2.5           0.23432    0.03746   6.255 5.00e-10 ***
+    ## BEN             3.33921    1.14768   2.910  0.00367 ** 
+    ## CO             45.69600    3.85895  11.842  < 2e-16 ***
+    ## EBE             2.79371    0.54813   5.097 3.83e-07 ***
+    ## NO             -0.20239    0.01714 -11.805  < 2e-16 ***
+    ## TCH            11.71564    1.31433   8.914  < 2e-16 ***
+    ## TOL             2.86320    0.21271  13.461  < 2e-16 ***
+    ## temp_avg       -0.12662    0.03818  -3.317  0.00093 ***
+    ## precipitation   0.17861    0.04095   4.362 1.37e-05 ***
+    ## humidity       -0.09773    0.01509  -6.478 1.20e-10 ***
+    ## wind_avg_speed -0.32267    0.03243  -9.949  < 2e-16 ***
+    ## temp_gap        0.30558    0.05297   5.769 9.40e-09 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 5.094 on 1739 degrees of freedom
+    ## Multiple R-squared:  0.9113, Adjusted R-squared:  0.9106 
+    ## F-statistic:  1276 on 14 and 1739 DF,  p-value: < 2.2e-16
+
+The R-squared value of 0.9113 is consistent with the initial model.
+
+*Multicollinearity* can be treated with the *VIF Method* (Variance Inflation Factors). As a general rule, if the VIF value is larger than 5, the multicollinearity is assumed to be high.
+
+For each variable of the model:
+
+-   the VIF values are calculated,
+-   the variable with the largest value is removed,
+-   the model is re-run the explanatory variables having a VIF value below 5.
+
+The current VIF values are:
 
     ##            SO2             O3          PM2.5            BEN             CO 
     ##       2.731960       4.737638       2.589103      15.175970      21.433198 
@@ -348,9 +399,16 @@ As a general rule, if VIF is larger than 5, then multi collinearity is assumed t
     ##  precipitation       humidity wind_avg_speed       temp_gap 
     ##       1.218099       6.663257       1.991433       4.170651
 
-For practicallity we decided to handle the above procedure with a **WHILE loop**.
+The VIF values resulting from the procedure are:
 
-So our **Final Model** after removing the multicollinear variables is
+    ##            SO2             O3          PM2.5            EBE            TCH 
+    ##       1.958788       3.351606       2.049109       1.829030       1.781684 
+    ##       temp_avg  precipitation wind_avg_speed       temp_gap 
+    ##       3.056575       1.154820       1.743077       2.058636
+
+</br>
+
+After removing multicollinear variables, the **Final Model** is:
 
     ## NO2 ~ SO2 + O3 + PM2.5 + EBE + TCH + temp_avg + precipitation + 
     ##     wind_avg_speed + temp_gap
@@ -383,9 +441,11 @@ So our **Final Model** after removing the multicollinear variables is
     ## Multiple R-squared:  0.8727, Adjusted R-squared:  0.872 
     ## F-statistic:  1328 on 9 and 1744 DF,  p-value: < 2.2e-16
 
-Let's see what a **10-Fold Cross validation** will tell us about our model:
+</br>
 
-    ## [1] "INITIAL MODEL:"
+A *10-Fold Cross Validation* can confirm the accuracy of the models:
+
+    ## [1] "Initial Model:"
 
     ## Linear Regression 
     ## 
@@ -402,7 +462,7 @@ Let's see what a **10-Fold Cross validation** will tell us about our model:
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
-    ## [1] "FINAL MODEL:"
+    ## [1] "Final Model:"
 
     ## Linear Regression 
     ## 
@@ -419,14 +479,16 @@ Let's see what a **10-Fold Cross validation** will tell us about our model:
     ## 
     ## Tuning parameter 'intercept' was held constant at a value of TRUE
 
-Let's have a look at the **predictions** for both models
+</br>
+
+The predictions of both models can be compared.
 
 ``` r
 test.sample$NO2_predicted_model_final <- predict(multi_model_NO2_final,test.sample)
 test.sample$NO2_predicted_model_0 <- predict(multi_model_NO2_0,test.sample)
 ```
 
-We show randomly rows 80-90 of the results. We can see that in some cases the original model is better, but also the other way around.
+Depending on the prediction point, the final model can be better or worse than the initial model. Below table displays some examples of the prediction points (predictions rows 80-90):
 
     ##          NO2 NO2_predicted_model_0 NO2_predicted_model_final
     ## 428 32.90278              33.47543                  38.52169
@@ -441,11 +503,17 @@ We show randomly rows 80-90 of the results. We can see that in some cases the or
     ## 489 45.54340              37.47732                  37.65892
     ## 490 31.50521              22.42451                  23.59314
 
-Let's **visualize** it: ![](Madrid-Pollution_Report_files/figure-markdown_github/Plot%20Comparison%20of%20Both%20Models%20-%20Table-1.png)
+</br>
+
+The accuracy of each prediction point can be understood by comparing their values with the actual values:
+
+![](Madrid-Pollution_Report_files/figure-markdown_github/Plot%20Comparison%20of%20Both%20Models%20-%20Table-1.png)
 
 *Blue = Initial Model | Orange = Final Model*
 
-Now lets compare the 2 **models** (initial and final):
+</br>
+
+The models predictions can be compared statistically using an *One-Way Analysis of Variance* (ANOVA) and a plot of the coefficients confidence intervals:
 
     ## Analysis of Variance Table
     ## 
@@ -463,7 +531,9 @@ Now lets compare the 2 **models** (initial and final):
 
 ![](Madrid-Pollution_Report_files/figure-markdown_github/Comparison%20with%20Anobva%20and%20Plot%20-%20Table-1.png)
 
-Our Final Model provides a way to predict the NO2 pollution level based on 9 pollutants and 5 weather parameters.
+The low *p-value* returned by the ANOVA indicates that the Final model is significantly better than the Initial Model. The plot gives an indication on how each variable influences the predictions, with a 95% confidence interval.
+
+As a conclusion, the Final Model provides a good way to predict the NO2 pollution level based on 9 pollutants and 5 weather parameters.
 
 </br>
 

@@ -24,6 +24,9 @@ print(paste0('[', round(difftime(Sys.time(),start_time, units = 'secs'),1), 's]:
              'All operations are over!'))
 
 # Render RMarkdown report
+if (is.null(webshot:::find_phantom())){
+  webshot::install_phantomjs()
+  }
 invisible(rmarkdown::render('Madrid-Pollution_Report.Rmd', 'github_document'))
 invisible(rmarkdown::render('Madrid-Pollution_Report.Rmd', 'html_document'))
 
