@@ -69,8 +69,9 @@ map
 
 ```
 
-***
+</br>
 
+***
 
 ## Packages
 
@@ -83,6 +84,8 @@ This analysis requires these R packages:
 * Statistics: `jtools`, `lattice`, `car`, `caret`, `MASS`  
 
 These packages are installed and loaded if necessary by the main script.
+
+</br>
 
 ***
 

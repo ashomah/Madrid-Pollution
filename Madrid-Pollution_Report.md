@@ -18,6 +18,8 @@ The stations are located all across the city:
 
 <img src="Madrid-Pollution_Report_files/figure-markdown_github/Map-1.png" style="display: block; margin: auto;" />
 
+</br>
+
 ------------------------------------------------------------------------
 
 Packages
@@ -32,6 +34,8 @@ This analysis requires these R packages:
 -   Statistics: `jtools`, `lattice`, `car`, `caret`, `MASS`
 
 These packages are installed and loaded if necessary by the main script.
+
+</br>
 
 ------------------------------------------------------------------------
 
